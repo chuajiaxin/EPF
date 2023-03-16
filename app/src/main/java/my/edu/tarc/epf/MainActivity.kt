@@ -1,8 +1,11 @@
 package my.edu.tarc.epf
 
+import android.app.AlertDialog
+import android.app.Dialog
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import androidx.activity.OnBackPressedCallback
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
@@ -12,6 +15,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.DialogFragment
 import my.edu.tarc.epf.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -34,12 +38,22 @@ class MainActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.nav_home, R.id.nav_dividend, R.id.nav_investment
+                R.id.nav_home, R.id.nav_gallery, R.id.nav_slideshow, R.id.nav_dividend, R.id.nav_investment
             ), drawerLayout
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+
+        val onBackPressedCallback = object: OnBackPressedCallback(true){
+            override fun handleOnBackPressed() {
+                //handle back press event
+                val exitDialogFragment = ExitDialogFragment()
+                exitDialogFragment.show(supportFragmentManager, "ExitDialog")
+            }
+        }
+        onBackPressedDispatcher.addCallback(onBackPressedCallback)
     }
+
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -55,7 +69,24 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if(item.itemId == R.id.action_settings){
             Snackbar.make(findViewById(R.id.nav_host_fragment_content_main), R.string.action_settings, Snackbar.LENGTH_SHORT).show()
+        }else if(item.itemId == R.id.action_about){
+            findNavController(R.id.nav_host_fragment_content_main)
+                .navigate(R.id.nav_about)
         }
         return super.onOptionsItemSelected(item)
+    }
+    class ExitDialogFragment: DialogFragment(){
+        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+            val builder = AlertDialog.Builder(requireActivity())
+
+            val negativeButton = builder.setMessage(getString(R.string.exit_message))
+                .setPositiveButton(getString(R.string.exit), { _, _ ->
+                    requireActivity().finish() // terminate this app
+                })
+                .setNegativeButton(getString(R.string.cancel)) { _, _ ->
+                    //Do nothing
+                }
+            return super.onCreateDialog(savedInstanceState)
+        }
     }
 }
